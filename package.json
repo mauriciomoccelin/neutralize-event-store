@@ -1,7 +1,7 @@
 {
-  "name": "graphql-test",
+  "name": "graphql-logs",
   "version": "1.0.0",
-  "description": "",
+  "description": "A simple GraphQL log generator and reader.",
   "main": "index.js",
   "scripts": {
     "dev": "babel-node server.js",
