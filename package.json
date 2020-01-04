@@ -2,11 +2,9 @@
   "name": "graphql-logs",
   "version": "1.0.0",
   "description": "A simple GraphQL log generator and reader.",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "dev": "babel-node server.js",
-    "build": "babel-node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "server": "babel-node server.js"
   },
   "keywords": [
     "graphql",
@@ -19,14 +17,14 @@
   "dependencies": {
     "babel-cli": "6.26.0",
     "babel-preset-env": "1.7.0",
-    "core-js": "^3.6.1",
+    "core-js": "3.6.1",
     "express": "4.17.1",
     "express-graphql": "0.9.0",
     "graphql": "14.5.8",
     "graphql-tools": "4.0.5",
+    "kafkajs": "1.11.0",
     "knex": "0.19.5",
     "mssql": "5.1.0",
-    "uuid": "3.3.3",
-    "kafkajs": "1.11.0"
+    "uuid": "3.3.3"
   }
 }

@@ -2,13 +2,9 @@ import { Kafka } from 'kafkajs'
 import db from '../config/database'
 import dbdf from '../config/database/databaseDefinitions'
 
-const {
-  BROCKER_HOST, BROCKER_USER_ID
-} = require('../.env')
-
 const kafka = new Kafka({
   clientId: 'graphql-logs',
-  brokers: [BROCKER_HOST]
+  brokers: [process.env.BROCKER_HOST]
 })
 
 const consumer = kafka.consumer({ groupId: 'logs-group' })
@@ -20,7 +16,7 @@ const saveLog = async input => await db(dbdf.table.requests.name)
       input.runtime,
       input.userId,
       input.dataSend,
-      input.dataReceivedgit
+      input.dataReceived
     )
   ).table(dbdf.table.requests.name)
 
@@ -43,12 +39,12 @@ const run = async () => {
 
 export default {
   start: async () => await run().catch(
-    error => saveLog({
+    () => saveLog({
       datetime: new Date().toISOString(),
       runtime: '00:00:00.0000',
-      userId: BROCKER_USER_ID,
-      dataSend: 'ERROR',
-      dataReceived: JSON.stringify(error)
+      userId: process.env.BROCKER_USER_ID,
+      dataSend: 'STARTUP ERROR',
+      dataReceived: 'IT WAS NOT POSSIBLE TO CONNECT IN KAFKA'
     })
   )
 }

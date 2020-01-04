@@ -1,0 +1,77 @@
+version: '3'
+services:
+  portainer:
+    restart: always
+    image: portainer/portainer
+    ports:
+      - "9000:9000"
+    volumes:
+      - portainer:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+  sql2019:
+    restart: always
+    image: mcr.microsoft.com/mssql/server:2019-GA-ubuntu-16.04
+    hostname: ${DB_HOST}
+    networks:
+      - overlay
+    ports:
+      - 1433:1433
+    environment:
+      SA_PASSWORD: ${APP_PORT}
+      ACCEPT_EULA: "Y"
+    volumes: 
+      - sql2019:/var/opt/mssql
+  zookeeper:
+    restart: always
+    image: confluentinc/cp-zookeeper:latest
+    hostname: zookeeper
+    networks: 
+      - overlay
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+  kafka:
+    restart: always
+    hostname: kafka
+    image: confluentinc/cp-kafka:latest
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    networks: 
+      - overlay
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INSIDE
+      KAFKA_LISTENERS: LISTENER_INSIDE://kafka:9091,LISTENER_OUTSIDE://kafka:9092
+      KAFKA_ADVERTISED_LISTENERS: LISTENER_INSIDE://kafka:9091,LISTENER_OUTSIDE://${KAFKA_LISTENER_OUTSIDE}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INSIDE:PLAINTEXT,LISTENER_OUTSIDE:PLAINTEXT
+  graphql_logs:
+    image: moccelin/graphql-logs:latest
+    build: .
+    hostname: graphqllogs
+    networks: 
+      - overlay
+    ports:
+      - 30001:80
+    environment:
+      APP_PORT: ${APP_PORT}
+      DB_HOST: ${DB_HOST}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      BROCKER_HOST: "kafka:9091"
+      BROCKER_USER_ID: "1"
+    depends_on:
+      - sql2019
+      - zookeeper
+      - kafka
+volumes:
+  sql2019:
+  portainer:
+networks:
+  overlay:

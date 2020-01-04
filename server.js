@@ -5,6 +5,7 @@ import rootValue from './src/api/resolvers'
 import kafka from './src/brocker/kafka'
 
 var app = express();
+var port = process.env.APP_PORT || 80
 
 kafka.start()
 
@@ -14,7 +15,7 @@ app.use('/graphql', graphqlHTTP({
   graphiql: true,
 }))
 
+
 app.listen(
-  4000, 
-  () => console.log('Now browse to localhost:4000/graphql')
+  port, () => console.log(`Now browse to localhost:${port}/graphql`)
 )
