@@ -1,16 +1,16 @@
-const dbdf = require('../config/database/databaseDefinitions')
+const dbdf = require('../config/database/definition')
 
 exports.up = function (knex) {
-  return knex.schema.createTable(dbdf.table.requests.name, table => {
-    table.string(dbdf.table.requests.field.id, 36).primary().notNullable()
-    table.datetime(dbdf.table.requests.field.datetime, { useTz: true }).notNullable()
-    table.time(dbdf.table.requests.field.runtime).notNullable()
-    table.bigInteger(dbdf.table.requests.field.userId).notNullable()
-    table.text(dbdf.table.requests.field.dataSend, 'mediumtext').nullable()
-    table.text(dbdf.table.requests.field.dataReceived, 'mediumtext').nullable()
+  return knex.schema.createTable(dbdf.table.integration.name, table => {
+    table.string(dbdf.table.integration.field.id, 36).primary().notNullable()
+    table.datetime(dbdf.table.integration.field.datetime, { useTz: true }).notNullable()
+    table.time(dbdf.table.integration.field.runtime).notNullable()
+    table.bigInteger(dbdf.table.integration.field.userId).notNullable()
+    table.text(dbdf.table.integration.field.dataSend, 'mediumtext').nullable()
+    table.text(dbdf.table.integration.field.dataReceived, 'mediumtext').nullable()
   })
 };
 
 exports.down = function (knex) {
-  return knex.schema.dropTable(REQUET_TABLE_NAME)
+  return knex.schema.dropTable(dbdf.table.integration.name)
 };

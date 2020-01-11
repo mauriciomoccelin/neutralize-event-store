@@ -1,29 +1,29 @@
-import db from '../config/database'
-import dbdf from '../config/database/databaseDefinitions'
+import db from '../config/database/connection'
+import dbdf from '../config/database/definition'
 
 export default {
-  async getRequestsLog() {
-    return await db(dbdf.table.requests.name)
-      .column(dbdf.table.requests.field)
+  async getIntegrationLog() {
+    return await db(dbdf.table.integration.name)
+      .column(dbdf.table.integration.field)
       .select()
   },
-  async getRequestsLogById({ id }) {
-    return await db(dbdf.table.requests.name)
-      .where({ [dbdf.table.requests.field.id]: id })
-      .column(dbdf.table.requests.field)
+  async getIntegrationLogById({ id }) {
+    return await db(dbdf.table.integration.name)
+      .where({ [dbdf.table.integration.field.id]: id })
+      .column(dbdf.table.integration.field)
       .first()
   },
-  async newRequestLog({ input }) {
-    await db(dbdf.table.requests.name)
+  async newIntegrationLog({ input }) {
+    await db(dbdf.table.integration.name)
       .insert(
-        dbdf.table.requests.create(
+        dbdf.table.integration.create(
           input.datetime,
           input.runtime,
           input.userId,
           input.dataSend,
           input.dataReceived
         )
-      ).table(dbdf.table.requests.name)
+      ).table(dbdf.table.integration.name)
     return true
   }
 }

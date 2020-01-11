@@ -5,6 +5,9 @@ const {
   DB_PASSWORD
 } = require('./.env')
 
+// knex migrate:make migration_name
+// knex migrate:latest
+
 module.exports = {
   client: 'mssql',
   connection: {

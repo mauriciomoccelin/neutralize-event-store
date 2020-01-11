@@ -1,6 +1,6 @@
 import { buildSchema } from 'graphql'
 
-const requestLogFields = `
+const integrationLogFields = `
   datetime: String!,
   runtime: String!,
   userId: String!,
@@ -8,25 +8,25 @@ const requestLogFields = `
   dataReceived: String
 `
 const types = `
-  type RequestLog {
+  type IntegrationLog {
     id: String!,
-    ${requestLogFields}
+    ${integrationLogFields}
   }
 `
 const inputs = `
-  input RequestLogInput {
-    ${requestLogFields}
+  input IntegrationLogInput {
+    ${integrationLogFields}
   }
 `
 const querys = `
   type Query {
-    getRequestsLog: [RequestLog!]!
-    getRequestsLogById(id: String!): RequestLog
+    getIntegrationsLog: [IntegrationLog!]!
+    getIntegrationLogById(id: String!): IntegrationLog
   }
 `
 const mutations = `
   type Mutation {
-    newRequestLog(input: RequestLogInput!): Boolean
+    newIntegrationLog(input: IntegrationLogInput!): Boolean
   }
 `
 export default buildSchema(`
