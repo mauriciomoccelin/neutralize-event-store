@@ -1,0 +1,23 @@
+query GetRequestLogs($datetime: String!, $limit: Int, $offset: Int) {
+  getRequestLogs(datetime: $datetime, limit: $limit, offset: $offset) {
+    id
+    datetime
+    userAgent
+    identifier
+  }
+}
+
+query GetIntegrationsLog($datetime: String!, $limit: Int, $offset: Int) {
+  getIntegrationsLog(datetime: $datetime, limit: $limit, offset: $offset) {
+    id
+    datetime,
+    userId,
+    runtime
+  }
+}
+
+variables {
+  "datetime": "2019-12-31",
+  "limit": 10,
+  "offset": 0
+}
