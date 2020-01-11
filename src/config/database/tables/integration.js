@@ -12,8 +12,8 @@ module.exports = {
   create(datetime, runtime, userId, dataSend, dataReceived) {
     return {
       id: uuid(),
-      datetime: datetime,
-      runtime: runtime,
+      datetime: datetime || new Date().toISOString(),
+      runtime: runtime || '00:00:00.0000',
       user_id: userId,
       data_send: dataSend,
       data_received: dataReceived

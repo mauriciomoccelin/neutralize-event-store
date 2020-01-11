@@ -1,6 +1,6 @@
 const uuid = require('uuid/v1')
 module.exports = {
-  name: 'request',
+  name: 'requests',
   field: {
     id: 'id',
     runtime: 'runtime',
@@ -13,11 +13,11 @@ module.exports = {
   create(runtime, datetime, userAgent, request, response, identifier) {
     return {
       id: uuid(),
-      datetime: datetime,
-      runtime: runtime,
-      user_agent: userAgent,
-      request_data: request,
-      response_data: response,
+      datetime: datetime || new Date().toISOString(),
+      runtime: runtime || '00:00:00.0000',
+      user_agent: userAgent || 'NOT SPECIFIED',
+      request_data: request ? JSON.stringify(request) : null,
+      response_data: response ? JSON.stringify(response) : null,
       identifier: identifier
     }
   }

@@ -5,9 +5,11 @@ exports.up = function (knex) {
     table.string(dbdf.table.integration.field.id, 36).primary().notNullable()
     table.datetime(dbdf.table.integration.field.datetime, { useTz: true }).notNullable()
     table.time(dbdf.table.integration.field.runtime).notNullable()
-    table.bigInteger(dbdf.table.integration.field.userId).notNullable()
-    table.text(dbdf.table.integration.field.dataSend, 'mediumtext').nullable()
-    table.text(dbdf.table.integration.field.dataReceived, 'mediumtext').nullable()
+    table.bigInteger(dbdf.table.integration.field.userId)
+    table.text(dbdf.table.integration.field.dataSend, 'mediumtext')
+    table.text(dbdf.table.integration.field.dataReceived, 'mediumtext')
+
+    table.index([dbdf.table.integration.field.userId, dbdf.table.integration.field.datetime], 'IX_user_id_datetime')
   })
 };
 
