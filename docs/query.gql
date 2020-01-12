@@ -1,10 +1,12 @@
 query GetRequestLogs($datetime: String!, $limit: Int, $offset: Int, $search: String) {
-  getRequestLogs(datetime: $datetime, limit: $limit, offset: $offset, search: $search) {
-    id
-    datetime
-    userAgent
-    identifier
-    runtime
+  result: getRequestLogs(datetime: $datetime, limit: $limit, offset: $offset, search: $search) {
+    total
+    itens {
+      id
+      datetime
+      runtime,
+      response
+    }
   }
 }
 

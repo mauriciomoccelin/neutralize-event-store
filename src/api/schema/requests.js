@@ -12,6 +12,11 @@ const type = `
     id: String!,
     ${fields}
   }
+
+  type RequestLogPagination {
+    total: Int!,
+    itens: [RequestLog!]!
+  }
 `
 
 const input = `
@@ -21,7 +26,7 @@ const input = `
 `
 
 const querys = `
-    getRequestLogs(datetime: String!, limit: Int, offset: Int, search: String): [RequestLog!]!
+    getRequestLogs(datetime: String!, limit: Int, offset: Int, search: String): RequestLogPagination
     getRequestLogById(id: String!): RequestLog
 `
 
