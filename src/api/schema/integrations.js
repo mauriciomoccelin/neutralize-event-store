@@ -20,7 +20,7 @@ const input = `
 `
 
 const querys = `
-    getIntegrationsLog(datetime: String!, limit: Int, offset: Int): [IntegrationLog!]!
+    getIntegrationsLog(datetime: String!, limit: Int, offset: Int, search: String): [IntegrationLog!]!
     getIntegrationLogById(id: String!): IntegrationLog
 `
 

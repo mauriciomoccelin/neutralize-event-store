@@ -1,12 +1,19 @@
 import db from '../../config/database/connection'
 import dbdf from '../../config/database/definition'
+import { getOffset } from '../../helpers/knex-query-helper'
 
-const getRequestLogs = async ({ datetime, limit, offset }) => {
+const getRequestLogs = async ({ datetime, limit, offset, search }) => {
   return await db(dbdf.table.request.name)
     .column(dbdf.table.request.field)
     .where(dbdf.table.request.field.datetime, '>', datetime)
+    .andWhere(builder => {
+        if (search) {
+          builder.where(dbdf.table.request.field.identifier, 'like', `${search}%`)
+          builder.orWhere(dbdf.table.request.field.userAgent, 'like', `${search}%`)
+        } else builder.where(1, 1)
+    })
     .orderBy(dbdf.table.request.field.datetime, 'desc')
-    .limit(limit || 1000).offset(offset || 0)
+    .limit(limit).offset(getOffset(limit, offset))
 }
 
 const getRequestLogById = async ({ id }) => {

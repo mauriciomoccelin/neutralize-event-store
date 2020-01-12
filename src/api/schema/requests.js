@@ -21,7 +21,7 @@ const input = `
 `
 
 const querys = `
-    getRequestLogs(datetime: String!, limit: Int, offset: Int): [RequestLog!]!
+    getRequestLogs(datetime: String!, limit: Int, offset: Int, search: String): [RequestLog!]!
     getRequestLogById(id: String!): RequestLog
 `
 

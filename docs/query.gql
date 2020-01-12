@@ -1,18 +1,22 @@
-query GetRequestLogs($datetime: String!, $limit: Int, $offset: Int) {
-  getRequestLogs(datetime: $datetime, limit: $limit, offset: $offset) {
+query GetRequestLogs($datetime: String!, $limit: Int, $offset: Int, $search: String) {
+  getRequestLogs(datetime: $datetime, limit: $limit, offset: $offset, search: $search) {
     id
     datetime
     userAgent
     identifier
+    runtime
   }
 }
+
 
 query GetIntegrationsLog($datetime: String!, $limit: Int, $offset: Int) {
   getIntegrationsLog(datetime: $datetime, limit: $limit, offset: $offset) {
     id
     datetime,
     userId,
-    runtime
+    runtime,
+    dataSend,
+    dataReceived
   }
 }
 
