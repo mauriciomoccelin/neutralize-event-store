@@ -1,6 +1,6 @@
 import { Kafka } from 'kafkajs'
+import db from '../config/database/connection'
 import dbdf from '../config/database/definition'
-import { saveLog } from '../helpers/knex-query-helper'
 
 const kafka = new Kafka({
   clientId: 'graphql-logs-delivery-failed',
@@ -8,6 +8,16 @@ const kafka = new Kafka({
 })
 
 const consumer = kafka.consumer({ groupId: 'logs-group-delivery-failed' })
+
+const saveLog = async input => await db(dbdf.table.deliveryFailed.name)
+  .insert(
+    dbdf.table.deliveryFailed.create(
+      input.datetime,
+      input.error,
+      input.topic,
+      input.message
+    )
+  )
 
 const run = async () => {
   await consumer.connect()
@@ -17,15 +27,7 @@ const run = async () => {
     partitionsConsumedConcurrently: 1,
     eachMessage: async ({ topic, partition, message }) => {
       let input = JSON.parse(message.value)
-      await saveLog(
-        dbdf.table.deliveryFailed.name,
-        dbdf.table.deliveryFailed.create(
-          input.datetime,
-          input.error,
-          input.topic,
-          input.message
-        )
-      )
+      await saveLog(input)
       console.log({ topic, partition, offset: message.offset })
     }
   })
@@ -34,7 +36,6 @@ const run = async () => {
 export default {
   start: async () => await run().catch(
     async () => await saveLog(
-      dbdf.table.deliveryFailed.name,
       {
         datetime: new Date().toISOString(),
         error: null,
