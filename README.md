@@ -10,6 +10,8 @@ It can be used to log events and nested aggregation root to track user behavior 
 
 - [PowerShell Core](https://docs.microsoft.com/pt-br/powershell/scripting/install/installing-powershell?view=powershell-7.1)
 - [knex Migration CLI](https://knexjs.org/#Migrations-CLI)
+- [.NET Core](https://dotnet.microsoft.com/download)
+- [Docker](https://docs.docker.com/)
 
 ## For deploy on docker
 
