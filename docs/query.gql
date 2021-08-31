@@ -15,5 +15,5 @@ variables {
   "datetime": "2021-08-03",
   "limit": 10,
   "offset": 1,
-  "search": "",
+  "search": ""
 }
