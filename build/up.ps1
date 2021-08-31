@@ -11,6 +11,7 @@ try {
   # app
   $env:APP_PORT="80"
   Set-Location ..
+  npm run build
   docker-compose up --build --detach
 }
 catch {

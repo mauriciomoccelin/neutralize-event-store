@@ -1,17 +1,15 @@
-import uuid from "uuid";
 import db from "../../data/connection";
 import { eventTable } from "../../data/tables";
 import { Event, PageRequest } from "../../entities";
 
-const getOffset = (input: PageRequest) => input.limit * (input.offset - 1);
-
 const getEvents = async (input: PageRequest) => {
   let totalResult = await db(eventTable.name)
-    .count(eventTable.field.id, { as: "total" })
-    .where(eventTable.field.datetime, ">", input.datetime)
+    .count(eventTable.field.eventId, { as: "total" })
+    .where(eventTable.field.datetime, ">=", input.datetime)
     .andWhere((builder: any) => {
       if (input.search) {
-        builder.where(eventTable.field.payload, "like", `${input.search}%`);
+        builder.where(eventTable.field.metadata, "like", `${input.search}%`);
+        builder.where(eventTable.field.eventType, "like", `${input.search}%`);
       } else builder.where(1, 1);
     });
 
@@ -20,12 +18,13 @@ const getEvents = async (input: PageRequest) => {
     .where(eventTable.field.datetime, ">", input.datetime)
     .andWhere((builder: any) => {
       if (input.search) {
-        builder.where(eventTable.field.payload, "like", `${input.search}%`);
+        builder.where(eventTable.field.metadata, "like", `${input.search}%`);
+        builder.where(eventTable.field.eventType, "like", `${input.search}%`);
       } else builder.where(1, 1);
     })
     .orderBy(eventTable.field.datetime, "desc")
     .limit(input.limit)
-    .offset(getOffset(input));
+    .offset(input.limit * (input.offset - 1));
 
   return {
     itens: itensResult,
@@ -35,14 +34,16 @@ const getEvents = async (input: PageRequest) => {
 
 const getEventById = async ({ id = 0 }) => {
   return await db(eventTable.name)
-    .columns
-    .where({ [eventTable.field.id]: id })
+    .columns.where({ [eventTable.field.eventId]: id })
     .first();
 };
 
 const newEvent = async (input: Event) => {
-  input.id = uuid.v1();
+  input.setEventId();
+  input.setDatetime();
+
   await db(eventTable.name).insert(input).table(eventTable.name);
+
   return true;
 };
 

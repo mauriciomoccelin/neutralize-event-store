@@ -1,11 +1,13 @@
 const fields = `
+  eventId: String!,
   datetime: String!,
-  payload: String
+  eventType: String,
+  data: String,
+  metadata: String
 `
 
 const type = `
   type Event {
-    id: String!,
     ${fields}
   }
 

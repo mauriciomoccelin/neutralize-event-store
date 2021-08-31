@@ -7,7 +7,7 @@ import rootValue from "./graphql/resolvers";
 import kafka from "./brocker";
 
 var app = express();
-var port = process.env.APP_PORT || 3000;
+var port = process.env.APP_PORT;
 
 new kafka().start().then(() => console.log("Kafka is starting"));
 

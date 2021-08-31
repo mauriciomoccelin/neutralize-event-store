@@ -1,4 +1,4 @@
-import { Kafka } from "kafkajs";
+import { EachMessagePayload, Kafka } from "kafkajs";
 import db from "../data/connection";
 import { eventTable } from "../data/tables";
 
@@ -9,7 +9,7 @@ const kafka = new Kafka({
   brokers: [process.env.BROCKER_HOST || "localhost:9092"],
 });
 
-const consumer = kafka.consumer({ groupId: "nl.gr.events" });
+const consumer = kafka.consumer({ groupId: "*" });
 
 const saveLog = async (input: Event) =>
   await db(eventTable.name).insert(input).table(eventTable.name);
@@ -20,21 +20,22 @@ const run = async () => {
 
   await consumer.run({
     partitionsConsumedConcurrently: 1,
-    eachMessage: async ({ topic, partition, message }) => {
-      const json = message.value?.toString() || "";
-      const input = JSON.parse(json);
+    eachMessage: async (payload: EachMessagePayload) => {
+      const input = new Event("", "", "", "", "");
+      
+      input.setEventId();
+      input.setDatetime();
+      input.eventType = Buffer.from(payload.message.key).toString();
+      input.data = Buffer.from(payload.message.value || "").toString();
+
       await saveLog(input);
-      console.log({ topic, partition, offset: message.offset });
     },
   });
 };
 
 export default {
   start: async () =>
-    await run().catch(() => {
-      const payload = JSON.stringify("It was not possible to connect in kafka");
-      const input = eventTable.create(payload);
-
-      saveLog(input);
+    await run().catch((reason) => {
+      console.log(reason);
     }),
 };
