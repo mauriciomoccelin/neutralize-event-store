@@ -1,29 +1,19 @@
-query GetRequestLogs($datetime: String!, $limit: Int, $offset: Int, $search: String) {
-  result: getRequestLogs(datetime: $datetime, limit: $limit, offset: $offset, search: $search) {
+query GetPagedEvents($datetime: String!, $limit: Int, $offset: Int, $search: String) {
+  result: getEvents(datetime: $datetime, limit: $limit, offset: $offset, search: $search) {
     total
     itens {
-      id
-      datetime
-      runtime,
-      response
+      eventId,
+      datetime,
+      eventType,
+      data,
+      metadata
     }
   }
 }
 
-
-query GetIntegrationsLog($datetime: String!, $limit: Int, $offset: Int) {
-  getIntegrationsLog(datetime: $datetime, limit: $limit, offset: $offset) {
-    id
-    datetime,
-    userId,
-    runtime,
-    dataSend,
-    dataReceived
-  }
-}
-
 variables {
-  "datetime": "2019-12-31",
+  "datetime": "2021-08-03",
   "limit": 10,
-  "offset": 0
+  "offset": 1,
+  "search": "",
 }
