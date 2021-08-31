@@ -8,7 +8,7 @@
     "DB_HOST": "localhost",
     "DB_DATABASE": "Store",
     "DB_USER": "sa",
-    "DB_PASSWORD": "3U>p-)EW.#.8l",
+    "DB_PASSWORD": "",
     "APP_PORT": "3000"
   }
 }

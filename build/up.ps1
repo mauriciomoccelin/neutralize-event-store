@@ -1,7 +1,7 @@
 try {
   # sql2019
   $env:DB_HOST="sql2019"
-  $env:DB_DATABASE="graphql_logs"
+  $env:DB_DATABASE="store"
   $env:DB_USER="sa"
   $env:DB_PASSWORD=""
 

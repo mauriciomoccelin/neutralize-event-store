@@ -21,8 +21,6 @@ services:
     environment:
       ACCEPT_EULA: "Y"
       SA_PASSWORD: ${DB_PASSWORD}
-    volumes: 
-      - sql2019:/var/opt/mssql
   zookeeper:
     restart: always
     container_name: zookeeper
@@ -76,7 +74,6 @@ services:
       - zookeeper
       - kafka
 volumes:
-  sql2019:
   portainer:
 networks:
   overlay:
