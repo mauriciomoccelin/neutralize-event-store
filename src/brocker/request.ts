@@ -25,9 +25,9 @@ const run = async () => {
       
       input.setEventId();
       input.setDatetime();
-      input.eventType = Buffer.from(payload.message.key).toString();
+      input.eventType = Buffer.from(payload.message.key || "").toString();
       input.data = Buffer.from(payload.message.value || "").toString();
-
+      
       await saveLog(input);
     },
   });
