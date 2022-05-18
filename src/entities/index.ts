@@ -1,11 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-export class PageRequest {
-  limit!: number;
-  offset!: number;
-  search?: string;
-  datetime!: string;
-}
+
 
 export class Event {
   eventId!: string;
