@@ -5,9 +5,9 @@ const Types = database.Schema.Types;
 
 export interface IEvent extends database.Document {
   type: string;
-  dateTime: string;
-  agregateId: string;
-  data: Array<any> | null;
+  dateTime: Date;
+  aggregateId: string;
+  data: any | null;
   metadata: Array<any> | null;
 }
 
