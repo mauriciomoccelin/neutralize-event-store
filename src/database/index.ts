@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/event-store';
+const mongoUri = process.env.MONGO_URI;
 if (!mongoUri) throw new Error("No mongo uri provided");
 
 mongoose.connect(mongoUri);
