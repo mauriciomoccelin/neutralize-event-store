@@ -22,6 +22,7 @@ export const start = async () => {
       const messageValue = Buffer.from(
         message.value?.toString() || ""
       ).toString();
+
       if (!messageValue) return;
 
       const event: IEvent = JSON.parse(messageValue);
