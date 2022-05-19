@@ -47,7 +47,7 @@ services:
     networks: 
       - overlay
     ports:
-      - 30001:80
+      - 80:80
     environment:
       APP_PORT: ${APP_PORT}
       MONGO_URI: ${MONGO_URI}
