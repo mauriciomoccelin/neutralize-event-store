@@ -2,9 +2,12 @@ import { Kafka, EachMessagePayload } from "kafkajs";
 
 import Event, { IEvent } from "../models/event.model";
 
+const brokerHost = process.env.BROCKER_HOST;
+if (!brokerHost) throw new Error("No broker host provided");
+
 const kafka = new Kafka({
   clientId: "nl.events.consumer",
-  brokers: [process.env.BROCKER_HOST || "localhost:9092"],
+  brokers: [brokerHost],
 });
 
 export const start = async () => {
