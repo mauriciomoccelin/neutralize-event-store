@@ -1,19 +1,17 @@
 try {
-  # sql2019
-  $env:DB_HOST="sql2019"
-  $env:DB_DATABASE="store"
-  $env:DB_USER="sa"
-  $env:DB_PASSWORD=""
+  # app
+  $env:APP_PORT="80"
 
   # kafka
   $env:KAFKA_LISTENER_OUTSIDE="localhost:9092"
 
-  # app
-  $env:APP_PORT="80"
+  # sql2019
+  $env:MONGO_URI="mongodb://mongo:27017/event-store"
+
   Set-Location ..
   npm i
   npm run build
-  docker-compose up --build --detach
+  docker-compose -p "neutralize-event-store" up --build --detach
 }
 catch {
   Set-Location ./build
