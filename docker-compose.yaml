@@ -41,7 +41,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INSIDE:PLAINTEXT,LISTENER_OUTSIDE:PLAINTEXT
   graphql_logs:
     container_name: graphql
-    image: moccelin/graphql-logs:latest
+    image: graphql-logs:latest
     build: .
     hostname: graphqllogs
     networks: 
