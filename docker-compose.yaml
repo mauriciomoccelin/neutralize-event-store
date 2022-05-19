@@ -1,26 +1,13 @@
 version: '3'
 services:
-  portainer:
+  mongo:
+    image: mongo
+    container_name: mongo
     restart: always
-    container_name: portainer
-    image: portainer/portainer
-    ports:
-      - "9000:9000"
-    volumes:
-      - portainer:/data
-      - /var/run/docker.sock:/var/run/docker.sock
-  sql2019:
-    restart: always
-    container_name: sql2019
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    hostname: ${DB_HOST}
-    networks:
+    networks: 
       - overlay
     ports:
-      - 1433:1433
-    environment:
-      ACCEPT_EULA: "Y"
-      SA_PASSWORD: ${DB_PASSWORD}
+      - "27017:27017"
   zookeeper:
     restart: always
     container_name: zookeeper
@@ -63,16 +50,13 @@ services:
       - 30001:80
     environment:
       APP_PORT: ${APP_PORT}
-      DB_HOST: ${DB_HOST}
-      DB_DATABASE: ${DB_DATABASE}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
+      MONGO_URI: ${MONGO_URI}
       BROCKER_HOST: "kafka:9091"
       BROCKER_USER_ID: "1"
     depends_on:
-      - sql2019
-      - zookeeper
+      - mongo
       - kafka
+      - zookeeper
 volumes:
   portainer:
 networks:
