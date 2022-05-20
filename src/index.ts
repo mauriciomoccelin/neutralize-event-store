@@ -1,18 +1,22 @@
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
+
 import express from "express";
-import { graphqlHTTP }  from "express-graphql";
+import { graphqlHTTP } from "express-graphql";
 
 import schema from "./graphql/schema";
 import rootValue from "./graphql/resolvers";
+import { start as kafkaStart } from "./kafka";
 
-import kafka from "./brocker";
+kafkaStart();
 
-var app = express();
-var port = process.env.APP_PORT;
-
-new kafka().start().then(() => console.log("Kafka is starting"));
+const app = express();
+const port = process.env.APP_PORT;
+const graphqlRoute = "/nl-event-store/v1/graphql";
 
 app.use(
-  "/graphql",
+  graphqlRoute,
   graphqlHTTP({
     schema: schema,
     graphiql: true,
@@ -20,4 +24,4 @@ app.use(
   })
 );
 
-app.listen(port, () => console.log(`Now browse to localhost:${port}/graphql`));
+app.listen(port);

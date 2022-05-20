@@ -1,49 +1,70 @@
-import db from "../../data/connection";
-import { eventTable } from "../../data/tables";
-import { Event, PageRequest } from "../../entities";
+import Event, { IEvent } from "../../models/event.model";
+
+class PageRequest {
+  limit!: number;
+  offset!: number;
+  type?: string;
+  datetime!: string;
+
+  static normalize(input: PageRequest): PageRequest {
+    const maxItemsResult = 10;
+
+    input.datetime = new Date(input.datetime).toJSON();
+    input.offset = input.offset <= 0 ? 1 : input.offset;
+    input.limit = input.limit > maxItemsResult ? maxItemsResult : input.limit;
+
+    return input;
+  }
+}
+
+const toItemResponse = (event: IEvent | any = {}) => {
+  if (!event) return null;
+
+  const item = {
+    type: event.type,
+    dateTime: `${event.dateTime.toJSON()}`,
+    aggregateId: event.aggregateId,
+    data: JSON.stringify(event.data),
+    metadata: JSON.stringify(event.metadata),
+  };
+
+  return item;
+};
 
 const getEvents = async (input: PageRequest) => {
-  let totalResult = await db(eventTable.name)
-    .count(eventTable.field.eventId, { as: "total" })
-    .where(eventTable.field.datetime, ">=", input.datetime)
-    .andWhere((builder: any) => {
-      if (input.search) {
-        builder.where(eventTable.field.metadata, "like", `${input.search}%`);
-        builder.where(eventTable.field.eventType, "like", `${input.search}%`);
-      } else builder.where(1, 1);
-    });
+  const { limit, offset, type, datetime } = PageRequest.normalize(input);
 
-  let itensResult = await db(eventTable.name)
-    .column(eventTable.field)
-    .where(eventTable.field.datetime, ">", input.datetime)
-    .andWhere((builder: any) => {
-      if (input.search) {
-        builder.where(eventTable.field.metadata, "like", `${input.search}%`);
-        builder.where(eventTable.field.eventType, "like", `${input.search}%`);
-      } else builder.where(1, 1);
-    })
-    .orderBy(eventTable.field.datetime, "desc")
-    .limit(input.limit)
-    .offset(input.limit * (input.offset - 1));
+  const queryCount = Event.count();
+  type && queryCount.where("type", type);
+  queryCount.where("dateTime", { $gt: datetime });
 
-  return {
-    itens: itensResult,
-    total: totalResult[0]["total"] || 0,
+  const queryItems = Event.find();
+  queryItems.skip(offset);
+  queryItems.limit(limit);
+  queryItems.sort({ dateTime: -1 });
+
+  type && queryItems.where("type", type);
+  queryItems.where("dateTime", { $gt: datetime });
+
+  const total = await queryCount.exec();
+  const items = await queryItems.exec();
+
+  const result = {
+    total,
+    items: items.map((event) => toItemResponse(event)),
   };
+
+  return result;
 };
 
-const getEventById = async ({ id = 0 }) => {
-  return await db(eventTable.name)
-    .columns.where({ [eventTable.field.eventId]: id })
-    .first();
+const getEventById = async ({ id = "" }) => {
+  const event = await Event.findOne({ aggregateId: id });
+  return toItemResponse(event);
 };
 
-const newEvent = async (input: Event) => {
-  input.setEventId();
-  input.setDatetime();
-
-  await db(eventTable.name).insert(input).table(eventTable.name);
-
+const newEvent = async (input: IEvent) => {
+  const event = new Event(input);
+  await event.save();
   return true;
 };
 

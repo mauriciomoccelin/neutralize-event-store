@@ -1,10 +1,10 @@
 const fields = `
-  eventId: String!,
-  datetime: String!,
-  eventType: String,
+  type: String!,
+  dateTime: String!,
+  aggregateId: String!,
   data: String,
   metadata: String
-`
+`;
 
 const type = `
   type Event {
@@ -13,28 +13,28 @@ const type = `
 
   type EventPagination {
     total: Int!,
-    itens: [Event!]!
+    items: [Event!]
   }
-`
+`;
 
 const input = `
   input EventInput {
     ${fields}
   }
-`
+`;
 
 const queries = `
   getEventById(id: String!): Event
-  getEvents(datetime: String!, limit: Int, offset: Int, search: String): EventPagination
-`
+  getEvents(datetime: String!, limit: Int, offset: Int, type: String): EventPagination!
+`;
 
 const mutations = `
   newEvent(input: EventInput!): Boolean
-`
+`;
 
 export default {
   type,
   input,
   queries,
-  mutations
-}
+  mutations,
+};
