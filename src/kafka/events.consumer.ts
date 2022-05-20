@@ -31,6 +31,8 @@ export const start = async () => {
       const event: IEvent = JSON.parse(messageValue);
       const eventModel = new Event(event);
       await eventModel.save();
+
+      console.log('Message received:', event.aggregateId);
     },
   });
 };
