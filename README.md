@@ -1,112 +1,44 @@
 # Neutralize Event Store
 
-A service for event storage on sql server using kafka as message transport. The service is connected to the broker and when it receives a message published in the defined topic it registers the event in the database.
+A service for event storage on MongoDB using kafka as message transport. The service is connected to the broker and when it receives a message published in the defined topic it registers the event in the database.
 
 The service exposes events using an api in [graphql](https://graphql.org/).
 
 It can be used to log events and nested aggregation root to track user behavior on a given system. See more in this article: [Pattern: Event sourcing](https://microservices.io/patterns/data/event-sourcing.html).
 
+---
+
 ## Dependencies
 
-- [PowerShell Core](https://docs.microsoft.com/pt-br/powershell/scripting/install/installing-powershell?view=powershell-7.1)
-- [knex Migration CLI](https://knexjs.org/#Migrations-CLI)
-- [.NET Core](https://dotnet.microsoft.com/download)
+- [NodeJS](https://nodejs.org/en/)
 - [Docker](https://docs.docker.com/)
+- [PowerShell Core](https://docs.microsoft.com/pt-br/powershell/scripting/install/installing-powershell?view=powershell-7.1)
 
+---
 ## For deploy on docker
 
-Go to the `./build` folder and set a value for the variable `$env:DB_PASSWORD=""`. It must be a strong password as the sql server requires it.
+Go to the `./build` folder and set a value for the variables on `up.ps1`:
 
+Ex:
 ```pwsh
-$env:DB_PASSWORD="Strong Password"
+# app
+$env:APP_PORT="80"
+
+# kafka
+$env:KAFKA_LISTENER_OUTSIDE="localhost:9092"
+
+# sql2019
+$env:MONGO_URI="mongodb://mongo:27017/event-store"
+
+...
 ```
 
-Then in the `./build` folder, run the `./up.ps1` file
-with the following command.
+Then in the `./build` folder, run the `./up.ps1` file with the following command.
 
 ```pwsh
 pwsh -File up.ps1
 ```
-
-Access the SQL Server database and create the database to run the database migrations.
-
-```sql
-CREATE DATABASE Store
-GO
-```
-
-Before running the migrations access your terminal and run the pwsh command to start a PowerShell Core session. Then set the following environment variables, change as needed.
-
-```pwsh
-$env:DB_HOST="localhost"
-$env:DB_DATABASE="store"
-$env:DB_USER="sa"
-$env:DB_PASSWORD="Strong Password"
-```
-
-Then run the migrations with the following command, still in the `./src/data` folder.
-
-```pwsh
-knex migrate:latest
-```
-
-The output will look something like this:
-```
-Requiring external module ts-node/register
-Batch 1 run: 1 migrations
-```
-
-If running on your local machine go to `localhost:30001/graphql` in your browser.
-
-In query variables add the following value:
-```json
-{
-  "datetime": "2021-08-03",
-  "limit": 10,
-  "offset": 1,
-  "search": "",
-}
-```
-And in the query copy the following code:
-
-```
-query GetPagedEvents($datetime: String!, $limit: Int, $offset: Int, $search: String) {
-  result: getEvents(datetime: $datetime, limit: $limit, offset: $offset, search: $search) {
-    total
-    itens {
-      eventId,
-      datetime,
-      eventType,
-      data,
-      metadata
-    }
-  }
-}
-```
-
-The return should be as follows.
-
-```json
-{
-  "data": {
-    "result": {
-      "total": 0,
-      "itens": []
-    }
-  }
-}
-```
-
-Ok, the services are online you can check if the kafka connection is online in the `graphql` container logs with the following command.
-
-```
-docker logs graphql
-```
-
-In the exit look for **Kafka is starting**.
-
-With this it is now possible to publish a message on the broker.
-
+---
 ## Publishing mesagen in kafka
 
 Let's leave an example of how to publish a message in the broker in *C#* code.
@@ -122,12 +54,24 @@ dotnet new console -o Publish
 public class StoreEvent
 {
     public Guid AggregateId { get; set; }
-    public string Nome { get; set; }
+    public string Type { get; set; }
+    public DateTime DateTime { get; set; }
+    public object Data { get; set; }
+    public IEnumerable<object> Metadata { get; set; }
 
-    public StoreEvent()
+    public StoreEvent(
+        string type,
+        Guid aggregateId,
+        DateTime dateTime,
+        object data,
+        IEnumerable<object> metadata
+    )
     {
-        AggregateId = Guid.NewGuid();
-        Nome = "Neutralize Logs"; 
+        Type = type;
+        AggregateId = aggregateId;
+        DateTime = dateTime;
+        Data = data;
+        Metadata = metadata;
     }
 }
 ```
@@ -141,29 +85,116 @@ static class Program
         var config = new ProducerConfig
         {
             BootstrapServers = "localhost:9092",
-            ClientId = "nl.events",
+            ClientId = "nl.events.consumer",
         };
 
         using (var producer = new ProducerBuilder<string, string>(config).Build())
         {
             foreach (var item in Enumerable.Range(0, 1000))
             {
+                var @event = new StoreEvent(
+                    typeof(StoreEvent).FullName,
+                    Guid.NewGuid(),
+                    DateTime.Now,
+                    item % 2 == 0 ? new
+                    {
+                        id = Guid.NewGuid(),
+                        name = "John Doe",
+                        email = "john.dow@fake.mail"
+                    } :
+                    new[] {
+                        new
+                        {
+                            id = Guid.NewGuid(),
+                            name = "John Doe",
+                            email = "john.dow@fake.mail"
+                        }
+                    },
+                    new object[]
+                    {
+                        new {
+                            id = Guid.NewGuid(),
+                            name = "John Doe",
+                            email = "john.dow@fake.mail"
+                        }
+                    }
+                );
+
                 var message = new Message<string, string>
                 {
                     Key = typeof(StoreEvent).FullName,
-                    Value = JsonConvert.SerializeObject(new StoreEvent())
+                    Value = JsonConvert.SerializeObject(
+                        @event,
+                        new JsonSerializerSettings
+                        {
+                            NullValueHandling = NullValueHandling.Ignore,
+                            ContractResolver = new CamelCasePropertyNamesContractResolver()
+                        }
+                    )
                 };
 
-                Console.WriteLine(item);
                 await producer.ProduceAsync("nl.tp.events", message);
             }
         }
     }
 }
 ```
+---
+## Read data with GraphQL 
 
-### Comments
+If running on your local machine go to `localhost/nl-event-store/v1/graphql` in your browser.
 
-Change the database user and ensure there is a strong password. The examples are as basic as possible to make understanding easier.
-The database used is sql server but the ideal would be a non-relational database to store the events. We implement because we like challenges.
-For more information see the [knex repository](https://github.com/knex/knex).
+In query variables add the following value:
+```json
+{
+  "datetime": "2022-08-03",
+  "limit": 10, // max 30
+  "offset": 1,
+  "type": ""
+}
+```
+And in the query copy the following code:
+
+```
+query GetPagedEvents($datetime: String!, $limit: Int, $offset: Int, $type: String) {
+  result: getEvents(datetime: $datetime, limit: $limit, offset: $offset, type: $type) {
+    total
+    items {
+      aggregateId,
+      dateTime,
+      type
+    }
+  }
+}
+
+```
+
+The return should be as follows.
+
+```json
+{
+  "data": {
+    "result": {
+      "total": 1000,
+      "items": [
+        {
+          "aggregateId": "42e9e8b3-98bd-4f75-a7b5-4d8e6ce4bed2",
+          "dateTime": "2022-05-20T11:21:49.476Z",
+          "type": "StoreEvent"
+        },
+        ...
+      ]
+    }
+  }
+}
+```
+
+Ok, the services are online you can check if the kafka connection is online in the `graphql` container logs with the following command.
+
+```
+docker logs graphql
+```
+
+In the exit look for **Kafka is starting**.
+
+With this it is now possible to publish a message on the broker.
