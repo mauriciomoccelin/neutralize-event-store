@@ -24,4 +24,4 @@ app.use(
   })
 );
 
-app.listen(port);
+app.listen(port, () => `Listening on port ${port}/${graphqlRoute}`);
