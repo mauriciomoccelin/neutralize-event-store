@@ -2,11 +2,12 @@
   "name": "neutralize-logs",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "serve": "nodemon",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "serve": "nodemon",
+    "start": "node dist/server.js",
+    "test": "jest --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
@@ -23,13 +24,21 @@
     "uuid": "8.3.2"
   },
   "devDependencies": {
+    "@babel/preset-env": "7.18.0",
+    "@babel/preset-typescript": "^7.17.12",
     "@types/express": "4.17.13",
+    "@types/jest": "27.5.1",
     "@types/mongoose": "5.11.97",
     "@types/node": "16.7.6",
+    "@types/sinon": "10.0.11",
+    "@types/supertest": "^2.0.12",
     "@types/uuid": "8.3.1",
     "dotenv": "16.0.1",
+    "jest": "28.1.0",
     "nodemon": "2.0.12",
     "rimraf": "3.0.2",
+    "sinon": "14.0.0",
+    "supertest": "6.2.3",
     "ts-node": "10.2.1",
     "typescript": "4.4.2"
   }
