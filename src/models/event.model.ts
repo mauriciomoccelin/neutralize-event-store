@@ -34,5 +34,5 @@ const EventSchema = new Schema({
   },
 });
 
-const Event = database.model<IEvent>("Event", EventSchema);
+const Event = database.model<IEvent>("events", EventSchema);
 export default Event;

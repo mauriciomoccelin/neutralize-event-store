@@ -1,21 +1,7 @@
 import Event, { IEvent } from "../../models/event.model";
 
-class PageRequest {
-  limit!: number;
-  offset!: number;
-  type?: string;
-  datetime!: string;
-
-  static normalize(input: PageRequest): PageRequest {
-    const maxItemsResult = 10;
-
-    input.datetime = new Date(input.datetime).toJSON();
-    input.offset = input.offset <= 0 ? 1 : input.offset;
-    input.limit = input.limit > maxItemsResult ? maxItemsResult : input.limit;
-
-    return input;
-  }
-}
+import { IEventResolver } from "../types/event.type";
+import { PageRequest } from "../types/paged-request.type";
 
 const toItemResponse = (event: IEvent | any = {}) => {
   if (!event) return null;
@@ -62,8 +48,17 @@ const getEventById = async ({ id = "" }) => {
   return toItemResponse(event);
 };
 
-const newEvent = async (input: IEvent) => {
-  const event = new Event(input);
+const newEvent = async (resolver: IEventResolver) => {
+  const { input } = resolver;
+  const eventInput = {
+    type: input.type,
+    dateTime: new Date(input.dateTime).toJSON(),
+    aggregateId: input.aggregateId,
+    data: input.data ? JSON.parse(input.data) : null,
+    metadata: input.metadata ? JSON.parse(input.metadata) : null,
+  };
+
+  const event = new Event(eventInput);
   await event.save();
   return true;
 };

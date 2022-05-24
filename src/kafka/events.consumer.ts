@@ -2,15 +2,7 @@ import { Kafka, EachMessagePayload } from "kafkajs";
 
 import Event, { IEvent } from "../models/event.model";
 
-const brokerHost = process.env.BROCKER_HOST;
-if (!brokerHost) throw new Error("No broker host provided");
-
-const kafka = new Kafka({
-  clientId: "nl.events.consumer",
-  brokers: [brokerHost],
-});
-
-export const start = async () => {
+const start = async (kafka: Kafka) => {
   const consumer = kafka.consumer({ groupId: "nl.events.consumer" });
 
   await consumer.connect();
@@ -32,7 +24,9 @@ export const start = async () => {
       const eventModel = new Event(event);
       await eventModel.save();
 
-      console.log('Message received:', event.aggregateId);
+      console.log("Message received:", event.aggregateId);
     },
   });
 };
+
+export default start;
