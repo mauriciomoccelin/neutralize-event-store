@@ -39,25 +39,68 @@ services:
       KAFKA_LISTENERS: LISTENER_INSIDE://kafka:9091,LISTENER_OUTSIDE://kafka:9092
       KAFKA_ADVERTISED_LISTENERS: LISTENER_INSIDE://kafka:9091,LISTENER_OUTSIDE://${KAFKA_LISTENER_OUTSIDE}
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INSIDE:PLAINTEXT,LISTENER_OUTSIDE:PLAINTEXT
-  graphql_logs:
-    container_name: graphql
-    image: graphql-logs:latest
-    build: .
-    hostname: graphqllogs
-    networks: 
+  graphql-logs-api:
+    container_name: graphql-logs-api
+    image: graphql-logs:api
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+    hostname: graphql-logs-api
+    networks:
       - overlay
     ports:
-      - 80:80
+      - 80:${APP_PORT}
     environment:
       APP_PORT: ${APP_PORT}
       MONGO_URI: ${MONGO_URI}
-      BROCKER_HOST: "kafka:9091"
-      BROCKER_USER_ID: "1"
+      BROCKER_HOST: ${BROCKER_HOST}
+      BROCKER_USER_ID: ${BROCKER_USER_ID}
+    depends_on:
+      - mongo
+      - kafka
+      - zookeeper
+  graphql-logs-dev:
+    container_name: graphql-logs-dev
+    image: graphql-logs:dev
+    hostname: graphql-logs-dev
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile.dev
+    networks: 
+      - overlay
+    volumes:
+      - ../:/app/
+    ports:
+      - 3000:${APP_PORT}
+    environment:
+      APP_PORT: ${APP_PORT}
+      MONGO_URI: ${MONGO_URI}
+      BROCKER_HOST: ${BROCKER_HOST}
+      BROCKER_USER_ID: ${BROCKER_USER_ID}
+    depends_on:
+      - mongo
+      - kafka
+      - zookeeper
+  graphql-logs-e2e:
+    container_name: graphql-logs-e2e
+    image: graphql-logs:e2e
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile.e2e
+    hostname: graphql-logs-e2e
+    networks:
+      - overlay
+    environment:
+      APP_PORT: ${APP_PORT}
+      MONGO_URI: ${MONGO_URI}
+      BROCKER_HOST: ${BROCKER_HOST}
+      BROCKER_USER_ID: ${BROCKER_USER_ID}
     depends_on:
       - mongo
       - kafka
       - zookeeper
 volumes:
   portainer:
+  node_modules:
 networks:
   overlay:

@@ -26,13 +26,13 @@ const EventSchema = new Schema({
   },
   data: {
     required: false,
-    type: Types.Mixed,
+    type: Types.Subdocument,
   },
   metadata: {
     required: false,
-    type: Types.Mixed,
+    type: Types.Subdocument,
   },
 });
 
-const Event = database.model<IEvent>("Event", EventSchema);
+const Event = database.model<IEvent>("events", EventSchema);
 export default Event;
