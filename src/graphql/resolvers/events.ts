@@ -1,6 +1,6 @@
 import Event, { IEvent } from "../../models/event.model";
 
-import { IEventInput, IEventResolver } from "../types/event.type";
+import { IEventResolver } from "../types/event.type";
 import { PageRequest } from "../types/paged-request.type";
 
 const toItemResponse = (event: IEvent | any = {}) => {
@@ -48,23 +48,4 @@ const getEventById = async ({ id = "" }) => {
   return toItemResponse(event);
 };
 
-const newEvent = async (resolver: IEventResolver) => {
-  const { input } = resolver;
-
-  const data: any = !!input.data ? JSON.parse(input.data) : null;
-  const metadata: any[] = !!input.metadata ? JSON.parse(input.metadata) : null;
-
-  const event = new Event({
-    data,
-    metadata,
-    type: input.type,
-    aggregateId: input.aggregateId,
-    dateTime: new Date(input.dateTime),
-  });
-
-  await event.save();
-
-  return true;
-};
-
-export { newEvent, getEvents, getEventById };
+export { getEvents, getEventById };

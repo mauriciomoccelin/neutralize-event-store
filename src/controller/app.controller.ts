@@ -1,8 +1,9 @@
 import express from "express";
 import { graphqlHTTP } from "express-graphql";
 
-import schema from "./graphql/schema";
-import rootValue from "./graphql/resolvers";
+import schema from "../graphql/schema";
+import rootValue from "../graphql/resolvers";
+import { authorize } from "../middlewares/authorize.middleware";
 
 const registerGraphqlRoute = (express: express.Express) => {
   const graphqlRoutePath = "/nl-event-store/v1/graphql";
@@ -25,6 +26,7 @@ class AppController {
 
   middlewares() {
     this.express.use(express.json());
+    this.express.use(authorize("Event"));
   }
 
   routes() {
@@ -32,5 +34,4 @@ class AppController {
   }
 }
 
-const app = new AppController(express()).express;
-export default app;
+export default AppController;

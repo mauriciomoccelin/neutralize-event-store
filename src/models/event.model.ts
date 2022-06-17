@@ -6,6 +6,7 @@ const Types = database.Schema.Types;
 export interface IEvent extends database.Document {
   type: string;
   dateTime: Date;
+  tenantId: string;
   aggregateId: string;
   data: any | null;
   metadata: Array<any> | null;
@@ -20,17 +21,22 @@ const EventSchema = new Schema({
     required: true,
     type: Types.Date,
   },
+  tenantId: {
+    ref: "Tenant",
+    required: true,
+    type: Types.ObjectId,
+  },
   aggregateId: {
     required: true,
     type: Types.String,
   },
   data: {
     required: false,
-    type: Types.Subdocument,
+    type: Types.Mixed,
   },
   metadata: {
     required: false,
-    type: Types.Subdocument,
+    type: Types.Mixed,
   },
 });
 
