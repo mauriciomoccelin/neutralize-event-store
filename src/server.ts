@@ -2,11 +2,21 @@ if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
 
+import express from "express";
 import { start as kafkaStart } from "./kafka";
 
-kafkaStart();
+// controllers
+import AppController from "./controller/app.controller";
+import TenantController from "./controller/tenant.controller";
 
-import app from "./app.controller";
+// models
+import TenantModel from "./models/tenant.model";
+
+const applicattion = express();
 const port = process.env.APP_PORT;
 
-app.listen(port, () => `Listening on port ${port}`);
+new AppController(applicattion);
+new TenantController(applicattion, TenantModel);
+
+kafkaStart();
+applicattion.listen(port, () => console.log("Listening on port " + port));

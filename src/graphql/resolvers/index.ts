@@ -1,7 +1,6 @@
-import { newEvent, getEvents, getEventById } from "./events";
+import { getEvents, getEventById } from "./events";
 
 export default {
-  newEvent,
   getEvents,
   getEventById,
 };

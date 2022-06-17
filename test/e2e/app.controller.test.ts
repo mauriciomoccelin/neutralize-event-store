@@ -1,9 +1,32 @@
+import express from "express";
+import jwt from "jsonwebtoken";
 import request, { Response } from "supertest";
 
-import app from "../../src/app.controller";
 import database from "../../src/database";
+import Tenant from "../../src/models/tenant.model";
+import { genereteTenant } from "./fixturies/e2e.fixture";
 
-describe("app.controller", () => {
+import AppController from "../../src/controller/app.controller";
+
+describe("application.controller", () => {
+  let token: string;
+  let application: express.Application;
+
+  beforeAll(async () => {
+    application = new AppController(express()).express;
+
+    const tenant = genereteTenant();
+    const newTenant = new Tenant(tenant);
+    await newTenant.save();
+
+    const payload = {
+      id: newTenant.id,
+      role: "Tenant",
+    };
+
+    token = jwt.sign(payload, process.env.JWT_SECRET || "");
+  });
+
   afterAll(async () => await database.disconnect());
 
   describe("when send a valid request query", () => {
@@ -32,8 +55,9 @@ describe("app.controller", () => {
 
     let response: Response;
     beforeAll(async () => {
-      response = await request(app)
+      response = await request(application)
         .post("/nl-event-store/v1/graphql?")
+        .set("Authorization", `Bearer ${token}`)
         .send(query);
     });
 
@@ -74,8 +98,9 @@ describe("app.controller", () => {
 
     let response: Response;
     beforeAll(async () => {
-      response = await request(app)
+      response = await request(application)
         .post("/nl-event-store/v1/graphql?")
+        .set("Authorization", `Bearer ${token}`)
         .send(query);
     });
 
@@ -117,8 +142,9 @@ describe("app.controller", () => {
 
     let response: Response;
     beforeAll(async () => {
-      response = await request(app)
+      response = await request(application)
         .post("/nl-event-store/v1/graphql?")
+        .set("Authorization", `Bearer ${token}`)
         .send(query);
     });
 
@@ -131,120 +157,6 @@ describe("app.controller", () => {
       expect(errors[0].message).toEqual(
         'Variable "$datetime" of non-null type "String!" must not be null.'
       );
-    });
-  });
-
-  describe("when send a valid mutation must return true", () => {
-    const query = {
-      query: `
-        mutation addEvent ($input: EventInput!) {
-          newEvent(input: $input)
-        }
-      `,
-      variables: {
-        input: {
-          type: "EventType",
-          dateTime: "2022-03-08",
-          aggregateId: "233cea12-d97c-11ec-9d64-0242ac120002",
-          data: JSON.stringify({
-            age: 30,
-            name: "John Doe",
-          }),
-          metadata: JSON.stringify({
-            ip: "192.168.1.80",
-            userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36",
-          }),
-        },
-      },
-      operationName: "addEvent",
-    };
-
-    let response: Response;
-    beforeAll(async () => {
-      response = await request(app)
-        .post("/nl-event-store/v1/graphql?")
-        .send(query);
-    });
-
-    it("should return a status 200", () => {
-      expect(response.status).toBe(200);
-    });
-
-    it("should return new event equals true", () => {
-      const { data } = response.body;
-      expect(data["newEvent"]).toEqual(true);
-    });
-  });
-
-  describe("when send a valid mutation without data and metada must return true", () => {
-    const query = {
-      query: `
-        mutation addEvent ($input: EventInput!) {
-          newEvent(input: $input)
-        }
-      `,
-      variables: {
-        input: {
-          type: "EventType",
-          dateTime: "2022-03-08",
-          aggregateId: "233cea12-d97c-11ec-9d64-0242ac120002",
-          data: null,
-          metadata: null,
-        },
-      },
-      operationName: "addEvent",
-    };
-
-    let response: Response;
-    beforeAll(async () => {
-      response = await request(app)
-        .post("/nl-event-store/v1/graphql?")
-        .send(query);
-    });
-
-    it("should return a status 200", () => {
-      expect(response.status).toBe(200);
-    });
-
-    it("should return new event equals true", () => {
-      const { data } = response.body;
-      expect(data["newEvent"]).toEqual(true);
-    });
-  });
-
-  describe("when send a invalid mutation without required fields must return false", () => {
-    const query = {
-      query: `
-        mutation addEvent ($input: EventInput!) {
-          newEvent(input: $input)
-        }
-      `,
-      variables: {
-        input: {
-          type: "",
-          dateTime: "",
-          aggregateId: "",
-          data: null,
-          metadata: null,
-        },
-      },
-      operationName: "addEvent",
-    };
-
-    let response: Response;
-    beforeAll(async () => {
-      response = await request(app)
-        .post("/nl-event-store/v1/graphql?")
-        .send(query);
-    });
-
-    it("should return a status 200", () => {
-      expect(response.status).toBe(200);
-    });
-
-    it("should return new event equals true", () => {
-      const { errors } = response.body;
-      expect(errors[0].message).toContain("is required");
     });
   });
 });
