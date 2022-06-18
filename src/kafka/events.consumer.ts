@@ -10,38 +10,48 @@ const start = async (kafka: Kafka) => {
   await consumer.connect();
   await consumer.subscribe({ topic: "nl.tp.events", fromBeginning: true });
 
+  const logger = consumer.logger();
+
   await consumer.run({
     partitionsConsumedConcurrently: 1,
     eachMessage: async (payload: EachMessagePayload) => {
       const { message } = payload;
-      if (!message) return;
+      if (!message) {
+        logger.error("No message received");
+        return;
+      };
 
       const headers = message.headers || {};
       const token = Buffer.from(headers["X-NL-TOKEN"] || "").toString();
 
       const session = decodeToken(token);
-      if (!session) throw new Error("Token is invalid");
+      if (!session) {
+        logger.error("Invalid token");
+        return;
+      }
 
       const isAuthorized = hasPermissionForRole(session.role, "Event");
-      if (!isAuthorized) throw new Error("Unauthorized");
+      if (!isAuthorized) {
+        logger.error("Unauthorized");
+        return;
+      }
 
       const messageValue = Buffer.from(
         message.value?.toString() || ""
       ).toString();
 
-      if (!messageValue) return;
+      if (!messageValue) {
+        logger.error("No message value");
+        return;
+      }
 
       const event: IEvent = JSON.parse(messageValue);
-      const eventModel = new Event(event);
       event.tenantId = session.id;
 
+      const eventModel = new Event(event);
       await eventModel.save();
 
-      console.log({
-        event: event.type,
-        tenantId: event.tenantId,
-        aggregateId: event.aggregateId,
-      });
+      consumer.logger().info(`Event: ${event.type} processed`);
     },
   });
 };

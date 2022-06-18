@@ -15,28 +15,22 @@ It can be used to log events and nested aggregation root to track user behavior 
 - [PowerShell Core](https://docs.microsoft.com/pt-br/powershell/scripting/install/installing-powershell?view=powershell-7.1)
 
 ---
-## For deploy on docker
 
-Go to the `./build` folder and set a value for the variables on `up.ps1`:
+## For run e2e test
 
-Ex:
+Then in the `./build` folder, run the `./run.ps1` file with the following command.
+
 ```pwsh
-# app
-$env:APP_PORT="80"
-
-# kafka
-$env:KAFKA_LISTENER_OUTSIDE="localhost:9092"
-
-# sql2019
-$env:MONGO_URI="mongodb://mongo:27017/event-store"
-
-...
+run.ps1 -Teste2e
 ```
 
-Then in the `./build` folder, run the `./up.ps1` file with the following command.
+---
+## For develop
+
+Then in the `./build` folder, run the `./run.ps1` file with the following command.
 
 ```pwsh
-pwsh -File up.ps1
+run.ps1 -Dev
 ```
 ---
 ## Publishing mesagen in kafka
@@ -46,7 +40,11 @@ Let's leave an example of how to publish a message in the broker in *C#* code.
 - Create a console project.
 
 ```pwsh
-dotnet new console -o Publish
+dotnet new console -o Producer
+
+dotnet add package Confluent.Kafka
+dotnet add package Newtonsoft.Json
+
 ```
 
 - Create a model that represents an event in your application.
@@ -87,6 +85,8 @@ static class Program
             BootstrapServers = "localhost:9092",
             ClientId = "nl.events.consumer",
         };
+
+        var token = Encoding.UTF8.GetBytes("token here");
 
         using (var producer = new ProducerBuilder<string, string>(config).Build())
         {
@@ -130,7 +130,11 @@ static class Program
                             NullValueHandling = NullValueHandling.Ignore,
                             ContractResolver = new CamelCasePropertyNamesContractResolver()
                         }
-                    )
+                    ),
+                    Headers = new Headers
+                    {
+                        { "X-NL-TOKEN", token }
+                    }
                 };
 
                 await producer.ProduceAsync("nl.tp.events", message);
@@ -147,12 +151,15 @@ If running on your local machine go to `localhost/nl-event-store/v1/graphql` in 
 In query variables add the following value:
 ```json
 {
-  "datetime": "2022-08-03",
-  "limit": 10, // max 30
+  "type": "",
+  "limit": 1,
   "offset": 1,
-  "type": ""
+  "datetime": "2022-08-03"
 }
 ```
+
+> Max limit value is 30.
+
 And in the query copy the following code:
 
 ```
@@ -160,9 +167,9 @@ query GetPagedEvents($datetime: String!, $limit: Int, $offset: Int, $type: Strin
   result: getEvents(datetime: $datetime, limit: $limit, offset: $offset, type: $type) {
     total
     items {
-      aggregateId,
+      type,
       dateTime,
-      type
+      aggregateId
     }
   }
 }
@@ -178,11 +185,10 @@ The return should be as follows.
       "total": 1000,
       "items": [
         {
-          "aggregateId": "42e9e8b3-98bd-4f75-a7b5-4d8e6ce4bed2",
+          "type": "StoreEvent",
           "dateTime": "2022-05-20T11:21:49.476Z",
-          "type": "StoreEvent"
+          "aggregateId": "42e9e8b3-98bd-4f75-a7b5-4d8e6ce4bed2"
         },
-        ...
       ]
     }
   }
@@ -192,7 +198,7 @@ The return should be as follows.
 Ok, the services are online you can check if the kafka connection is online in the `graphql` container logs with the following command.
 
 ```
-docker logs graphql
+docker logs graphql-logs-api
 ```
 
 In the exit look for **Kafka is starting**.
