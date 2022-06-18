@@ -1,6 +1,6 @@
 param(
   [switch]$Dev,
-  [switch]$Test2e
+  [switch]$Teste2e
 )
 
 Clear-Host
