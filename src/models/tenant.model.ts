@@ -47,5 +47,5 @@ TenantSchema.pre("save", async function (next) {
   next();
 });
 
-const Tenant = database.model<ITenant>("tenants", TenantSchema);
+const Tenant = database.model<ITenant>("Tenants", TenantSchema);
 export default Tenant;

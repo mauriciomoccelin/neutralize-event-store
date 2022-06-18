@@ -22,7 +22,7 @@ const EventSchema = new Schema({
     type: Types.Date,
   },
   tenantId: {
-    ref: "Tenant",
+    ref: "Tenants",
     required: true,
     type: Types.ObjectId,
   },
@@ -40,5 +40,5 @@ const EventSchema = new Schema({
   },
 });
 
-const Event = database.model<IEvent>("events", EventSchema);
+const Event = database.model<IEvent>("Events", EventSchema);
 export default Event;
