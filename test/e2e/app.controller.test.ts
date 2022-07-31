@@ -3,25 +3,34 @@ import jwt from "jsonwebtoken";
 import request, { Response } from "supertest";
 
 import database from "../../src/database";
+import Event, { IEvent } from "../../src/models/event.model";
 import Tenant from "../../src/models/tenant.model";
-import { genereteTenant } from "./fixturies/e2e.fixture";
 
-import AppController from "../../src/controller/app.controller";
+import { genereteEvent, genereteTenant } from "./fixturies/e2e.fixture";
 
-describe("application.controller", () => {
+import EventController from "../../src/controller/event.controller";
+
+describe.only("application.controller", () => {
   let token: string;
+  let eventId: string;
   let application: express.Application;
 
   beforeAll(async () => {
-    application = new AppController(express()).express;
+    application = new EventController(express(), Event).express;
 
     const tenant = genereteTenant();
     const newTenant = new Tenant(tenant);
     await newTenant.save();
 
+    const event = genereteEvent(newTenant.id);
+    const newEvent = new Event(event);
+    await newEvent.save();
+
+    eventId = newEvent.id.toString();
+
     const payload = {
-      id: newTenant.id,
       role: "Tenant",
+      tenantId: newTenant.id,
     };
 
     token = jwt.sign(payload, process.env.JWT_SECRET || "");
@@ -29,134 +38,73 @@ describe("application.controller", () => {
 
   afterAll(async () => await database.disconnect());
 
-  describe("when send a valid request query", () => {
+  describe("when list events", () => {
     const query = {
-      operationName: "GetPagedEvents",
-      query: `
-      query GetPagedEvents(\$datetime: String!, \$limit: Int, \$offset: Int, \$type: String) {
-        result: getEvents(datetime: \$datetime, limit: \$limit, offset: \$offset, type: \$type) {
-          total
-          items {
-            aggregateId,
-            dateTime,
-            type,
-            data,
-            metadata
-          }
-        }
-      }`,
-      variables: {
-        limit: 30,
-        offset: 0,
-        type: null,
-        datetime: "2023-02-03",
-      },
+      limit: 30,
+      offset: 0,
+      type: null,
+      datetime: "2022-02-03",
     };
 
     let response: Response;
     beforeAll(async () => {
       response = await request(application)
-        .post("/nl-event-store/v1/graphql?")
+        .get("/nl-event-store/v1/event/list")
         .set("Authorization", `Bearer ${token}`)
-        .send(query);
+        .query(query);
     });
 
-    it("should return a valid response", () => {
+    it("should return status 200", () => {
       expect(response.status).toBe(200);
     });
 
     it("should return a total greater than or equal zero", () => {
-      const { result } = response.body.data;
-      expect(result.total).toBeGreaterThanOrEqual(0);
+      const { total } = response.body;
+      expect(total).toBeGreaterThan(0);
     });
   });
 
-  describe("when send a invalid operation name", () => {
-    const operationName = "InvaliOperatioNname";
+  describe("when get event by id", () => {
+    let response: Response;
+    beforeAll(async () => {
+      response = await request(application)
+        .get("/nl-event-store/v1/event/get-by-id")
+        .set("Authorization", `Bearer ${token}`)
+        .query({ id: eventId });
+    });
+
+    it("should return status 200", () => {
+      expect(response.status).toBe(200);
+    });
+
+    it("should return a event with the same id", () => {
+      const result = response.body;
+      expect(Object.values(result)).toContain(eventId);
+    });
+  });
+
+  describe("when get event by id, but not found", () => {
     const query = {
-      operationName: operationName,
-      query: `
-      query GetPagedEvents(\$datetime: String!, \$limit: Int, \$offset: Int, \$type: String) {
-        result: getEvents(datetime: \$datetime, limit: \$limit, offset: \$offset, type: \$type) {
-          total
-          items {
-            aggregateId,
-            dateTime,
-            type,
-            data,
-            metadata
-          }
-        }
-      }`,
-      variables: {
-        limit: 30,
-        offset: 0,
-        type: null,
-        datetime: "2023-02-03",
-      },
+      id: "62e5def95a1b0568706b3132",
     };
+
+    const errorAssert = { error: "Event is not found." };
 
     let response: Response;
     beforeAll(async () => {
       response = await request(application)
-        .post("/nl-event-store/v1/graphql?")
+        .get("/nl-event-store/v1/event/get-by-id")
         .set("Authorization", `Bearer ${token}`)
-        .send(query);
+        .query(query);
     });
 
-    it("should return a status 500", () => {
-      expect(response.status).toBe(500);
+    it("should return status 404", () => {
+      expect(response.status).toBe(404);
     });
 
-    it("should unknown operation named", () => {
-      const { errors } = response.body;
-      expect(errors[0].message).toEqual(
-        `Unknown operation named \"${operationName}\".`
-      );
-    });
-  });
-
-  describe("when send a query wintout datetime variable", () => {
-    const query = {
-      operationName: "GetPagedEvents",
-      query: `
-      query GetPagedEvents(\$datetime: String!, \$limit: Int, \$offset: Int, \$type: String) {
-        result: getEvents(datetime: \$datetime, limit: \$limit, offset: \$offset, type: \$type) {
-          total
-          items {
-            aggregateId,
-            dateTime,
-            type,
-            data,
-            metadata
-          }
-        }
-      }`,
-      variables: {
-        limit: 30,
-        offset: 0,
-        type: null,
-        datetime: null,
-      },
-    };
-
-    let response: Response;
-    beforeAll(async () => {
-      response = await request(application)
-        .post("/nl-event-store/v1/graphql?")
-        .set("Authorization", `Bearer ${token}`)
-        .send(query);
-    });
-
-    it("should return a status 500", () => {
-      expect(response.status).toBe(500);
-    });
-
-    it("should unknown operation named", () => {
-      const { errors } = response.body;
-      expect(errors[0].message).toEqual(
-        'Variable "$datetime" of non-null type "String!" must not be null.'
-      );
+    it("should be null", () => {
+      const result = response.body;
+      expect(result.error).toBe(errorAssert.error);
     });
   });
 });

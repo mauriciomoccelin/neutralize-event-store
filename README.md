@@ -35,6 +35,8 @@ run.ps1 -Dev
 ---
 ## Publishing mesagen in kafka
 
+> See how to create a tenant and generate a token in 2e2 tests.
+
 Let's leave an example of how to publish a message in the broker in *C#* code.
 
 - Create a console project.
@@ -144,59 +146,30 @@ static class Program
 }
 ```
 ---
-## Read data with GraphQL 
+## Read data with REST API
 
-If running on your local machine go to `localhost/nl-event-store/v1/graphql` in your browser.
+If running on your local machine use.
 
-In query variables add the following value:
+GET `nl-event-store/v1/event/list?limit=2&offset=0&datetime=2021-08-01`
+Response
 ```json
 {
-  "type": "",
-  "limit": 1,
-  "offset": 1,
-  "datetime": "2022-08-03"
-}
-```
-
-> Max limit value is 30.
-
-And in the query copy the following code:
-
-```
-query GetPagedEvents($datetime: String!, $limit: Int, $offset: Int, $type: String) {
-  result: getEvents(datetime: $datetime, limit: $limit, offset: $offset, type: $type) {
-    total
-    items {
-      type,
-      dateTime,
-      aggregateId
+  "total": 3,
+  "items": [
+    {
+      "_id": "62e5d50b7092826cabfdd2c8",
+      "type": "mollitia-consequatur-deleniti",
+      "dateTime": "2022-07-31T00:01:09.311Z",
+      "aggregateId": "aspernatur-quaerat-eum"
+    },
+    {
+      "_id": "62e5d30bd57c66b6e57a6c97",
+      "type": "dolores-exercitationem-earum",
+      "dateTime": "2022-07-30T23:44:00.328Z",
+      "aggregateId": "ipsum-harum-error"
     }
-  }
+  ]
 }
-
-```
-
-The return should be as follows.
-
-```json
-{
-  "data": {
-    "result": {
-      "total": 1000,
-      "items": [
-        {
-          "type": "StoreEvent",
-          "dateTime": "2022-05-20T11:21:49.476Z",
-          "aggregateId": "42e9e8b3-98bd-4f75-a7b5-4d8e6ce4bed2"
-        },
-      ]
-    }
-  }
-}
-```
-
-Ok, the services are online you can check if the kafka connection is online in the `graphql` container logs with the following command.
-
 ```
 docker logs graphql-logs-api
 ```

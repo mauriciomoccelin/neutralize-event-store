@@ -46,7 +46,7 @@ const start = async (kafka: Kafka) => {
       }
 
       const event: IEvent = JSON.parse(messageValue);
-      event.tenantId = session.id;
+      event.tenantId = session.tenantId;
 
       const eventModel = new Event(event);
       await eventModel.save();
