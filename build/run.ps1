@@ -5,7 +5,7 @@ param(
 
 Clear-Host
 
-if ($True -eq $Test2e) {
+if ($True -eq $Teste2e) {
   Set-Location ../docker
   docker-compose --env-file ../config/e2e.env up --build graphql-logs-e2e
   Set-Location ../build
