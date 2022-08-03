@@ -2,8 +2,6 @@
 
 A service for event storage on MongoDB using kafka as message transport. The service is connected to the broker and when it receives a message published in the defined topic it registers the event in the database.
 
-The service exposes events using an api in [graphql](https://graphql.org/).
-
 It can be used to log events and nested aggregation root to track user behavior on a given system. See more in this article: [Pattern: Event sourcing](https://microservices.io/patterns/data/event-sourcing.html).
 
 ---
@@ -171,9 +169,3 @@ Response
   ]
 }
 ```
-docker logs graphql-logs-api
-```
-
-In the exit look for **Kafka is starting**.
-
-With this it is now possible to publish a message on the broker.

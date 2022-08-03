@@ -39,13 +39,13 @@ services:
       KAFKA_LISTENERS: LISTENER_INSIDE://kafka:9091,LISTENER_OUTSIDE://kafka:9092
       KAFKA_ADVERTISED_LISTENERS: LISTENER_INSIDE://kafka:9091,LISTENER_OUTSIDE://${KAFKA_LISTENER_OUTSIDE}
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INSIDE:PLAINTEXT,LISTENER_OUTSIDE:PLAINTEXT
-  graphql-logs-api:
-    container_name: graphql-logs-api
-    image: graphql-logs:api
+  event-store-logs-api:
+    container_name: event-store-logs-api
+    image: event-store-logs:api
     build:
       context: ..
       dockerfile: ./docker/Dockerfile
-    hostname: graphql-logs-api
+    hostname: event-store-logs-api
     networks:
       - overlay
     ports:
@@ -60,10 +60,10 @@ services:
       - mongo
       - kafka
       - zookeeper
-  graphql-logs-dev:
-    container_name: graphql-logs-dev
-    image: graphql-logs:dev
-    hostname: graphql-logs-dev
+  event-store-logs-dev:
+    container_name: event-store-logs-dev
+    image: event-store-logs:dev
+    hostname: event-store-logs-dev
     build:
       context: ..
       dockerfile: ./docker/Dockerfile.dev
@@ -83,13 +83,13 @@ services:
       - mongo
       - kafka
       - zookeeper
-  graphql-logs-e2e:
-    container_name: graphql-logs-e2e
-    image: graphql-logs:e2e
+  event-store-logs-e2e:
+    container_name: event-store-logs-e2e
+    image: event-store-logs:e2e
     build:
       context: ..
       dockerfile: ./docker/Dockerfile.e2e
-    hostname: graphql-logs-e2e
+    hostname: event-store-logs-e2e
     networks:
       - overlay
     environment:
