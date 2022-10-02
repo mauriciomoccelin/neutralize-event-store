@@ -2,13 +2,5 @@
   "watch": ["src"],
   "ext": ".ts,.js",
   "ignore": [],
-  "exec": "ts-node ./src/server.ts",
-  "env": {
-    "NODE_ENV": "development",
-    "DB_HOST": "localhost",
-    "DB_DATABASE": "Store",
-    "DB_USER": "sa",
-    "DB_PASSWORD": "",
-    "APP_PORT": "3000"
-  }
+  "exec": "ts-node ./src/server.ts"
 }

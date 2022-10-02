@@ -39,38 +39,18 @@ services:
       KAFKA_LISTENERS: LISTENER_INSIDE://kafka:9091,LISTENER_OUTSIDE://kafka:9092
       KAFKA_ADVERTISED_LISTENERS: LISTENER_INSIDE://kafka:9091,LISTENER_OUTSIDE://${KAFKA_LISTENER_OUTSIDE}
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INSIDE:PLAINTEXT,LISTENER_OUTSIDE:PLAINTEXT
-  event-store-logs-api:
-    container_name: event-store-logs-api
-    image: event-store-logs:api
+  esl-dev:
+    container_name: esl-dev
+    image: esl:dev
+    hostname: esl-dev
     build:
-      context: ..
-      dockerfile: ./docker/Dockerfile
-    hostname: event-store-logs-api
-    networks:
-      - overlay
-    ports:
-      - 80:${APP_PORT}
-    environment:
-      APP_PORT: ${APP_PORT}
-      MONGO_URI: ${MONGO_URI}
-      BROCKER_HOST: ${BROCKER_HOST}
-      BROCKER_USER_ID: ${BROCKER_USER_ID}
-      JWT_SECRET: ${JWT_SECRET}
-    depends_on:
-      - mongo
-      - kafka
-      - zookeeper
-  event-store-logs-dev:
-    container_name: event-store-logs-dev
-    image: event-store-logs:dev
-    hostname: event-store-logs-dev
-    build:
-      context: ..
-      dockerfile: ./docker/Dockerfile.dev
+      context: .
+      dockerfile: Dockerfile
+    command: npm run serve
     networks: 
       - overlay
     volumes:
-      - ../:/app/
+      - ./:/app/
     ports:
       - 3000:${APP_PORT}
     environment:
@@ -83,13 +63,14 @@ services:
       - mongo
       - kafka
       - zookeeper
-  event-store-logs-e2e:
-    container_name: event-store-logs-e2e
-    image: event-store-logs:e2e
+  esl-e2e:
+    container_name: esl-e2e
+    image: esl:e2e
     build:
-      context: ..
-      dockerfile: ./docker/Dockerfile.e2e
-    hostname: event-store-logs-e2e
+      context: .
+      dockerfile: Dockerfile
+    command: npm run test:e2e
+    hostname: esl-e2e
     networks:
       - overlay
     environment:
@@ -102,8 +83,5 @@ services:
       - mongo
       - kafka
       - zookeeper
-volumes:
-  portainer:
-  node_modules:
 networks:
   overlay:
