@@ -16,7 +16,7 @@ It can be used to log events and nested aggregation root to track user behavior 
 
 ## For run e2e test
 
-Then in the `./build` folder, run the `./run.ps1` file with the following command.
+Then in the `./` folder, run the `./run.ps1` file with the following command.
 
 ```pwsh
 run.ps1 -Teste2e
@@ -25,10 +25,10 @@ run.ps1 -Teste2e
 ---
 ## For develop
 
-Then in the `./build` folder, run the `./run.ps1` file with the following command.
+Then in the `./` folder, run the `./run.ps1` file with the following command.
 
 ```pwsh
-run.ps1 -Dev
+run.ps1
 ```
 ---
 ## Publishing mesagen in kafka
