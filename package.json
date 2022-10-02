@@ -18,7 +18,7 @@
     "jsonwebtoken": "8.5.1",
     "kafkajs": "1.15.0",
     "knex": "0.95.10",
-    "mongoose": "6.3.3",
+    "mongoose": "6.4.6",
     "mssql": "7.2.1",
     "uuid": "8.3.2"
   },
