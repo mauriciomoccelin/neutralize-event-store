@@ -17,7 +17,7 @@
     "express": "4.17.1",
     "jsonwebtoken": "8.5.1",
     "kafkajs": "1.15.0",
-    "knex": "0.95.10",
+    "knex": "2.4.0",
     "mongoose": "6.6.3",
     "mssql": "7.2.1",
     "uuid": "8.3.2"
